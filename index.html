@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo School - Timetable | ManageBac+</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        
+        .header {
+            background: #fff;
+            border-bottom: 1px solid #e9ecef;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            margin: 0;
+            color: #4a90e2;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .nav-bar {
+            background: #4a90e2;
+            padding: 0.75rem 2rem;
+            color: white;
+        }
+        
+        .nav-bar .breadcrumb {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        .timetable-header {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .timetable-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+        
+        .timetable-info {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .timetable-container {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        
+        thead th {
+            background: #f8f9fa;
+            padding: 1rem 0.5rem;
+            text-align: center;
+            border: 1px solid #dee2e6;
+            font-weight: 600;
+            color: #495057;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        thead th:first-child {
+            background: #e9ecef;
+            font-weight: 700;
+            width: 80px;
+        }
+        
+        tbody td {
+            border: 1px solid #dee2e6;
+            padding: 0;
+            vertical-align: top;
+            height: 80px;
+            position: relative;
+        }
+        
+        tbody td:first-child {
+            background: #f8f9fa;
+            text-align: center;
+            font-weight: 600;
+            color: #495057;
+            padding: 1rem 0.5rem;
+            width: 80px;
+        }
+        
+        .period-classes {
+            height: 100%;
+            position: relative;
+        }
+        
+        .period-classes.with-period {
+            padding: 4px;
+        }
+        
+        .class-wrapper {
+            background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+            color: white;
+            border-radius: 4px;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .class-info {
+            padding: 8px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        .period-duration {
+            font-size: 0.7rem;
+            opacity: 0.9;
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+        
+        .class-name {
+            margin: 2px 0;
+        }
+        
+        .class-name a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.8rem;
+            line-height: 1.2;
+        }
+        
+        .text-ellipsis {
+            font-size: 0.7rem;
+            opacity: 0.8;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        /* Subject-specific colors */
+        .subject-japanese { background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); }
+        .subject-math { background: linear-gradient(135deg, #27ae60 0%, #229954 100%); }
+        .subject-physics { background: linear-gradient(135deg, #8e44ad 0%, #7d3c98 100%); }
+        .subject-environmental { background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); }
+        .subject-english { background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); }
+        .subject-cs { background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%); }
+        .subject-tok { background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); }
+        .subject-pe { background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%); }
+        
+        .break-period {
+            background: linear-gradient(135deg, #ecf0f1 0%, #bdc3c7 100%);
+            color: #7f8c8d;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            border-radius: 4px;
+            margin: 4px;
+            height: calc(100% - 8px);
+        }
+        
+        .legend {
+            margin-top: 1.5rem;
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .legend h4 {
+            margin: 0 0 0.5rem 0;
+            color: #495057;
+            font-size: 0.9rem;
+        }
+        
+        .legend-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            font-size: 0.8rem;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>ManageBac+ Demo School</h1>
+    </div>
+    
+    <div class="nav-bar">
+        <div class="breadcrumb">Dashboard > Timetables > Student Timetable</div>
+    </div>
+    
+    <div class="main-content">
+        <div class="timetable-header">
+            <div class="timetable-title">Weekly Timetable        (AI generated page, since you need a school account to access real ManageBac page</div>
+            <div class="timetable-info">Academic Year 2024-2025 | Current Week: March 11-15, 2025</div>
+        </div>
+        
+        <div class="timetable-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Period</th>
+                        <th>Mon, Mar 11</th>
+                        <th>Tue, Mar 12</th>
+                        <th>Wed, Mar 13</th>
+                        <th>Thu, Mar 14</th>
+                        <th>Fri, Mar 15</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td class="period-classes with-period">
+                            <div class="class-wrapper subject-japanese">
+                                <div class="class-info">
+                                    <div class="period-duration">8:00 AM - 9:10 AM</div>
+                                    <div class="class-name">
+                                        <a href="#">Japanese ab initio SL</a>
+                                    </div>
+                                    <div class="text-ellipsis">Asama Lounge</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="period-classes with-period">
+                            <div class="class-wrapper subject-japanese">
+                                <div class="class-info">
+                                    <div class="period-duration">8:00 AM - 9:10 AM</div>
+                                    <div class="class-name">
+                                        <a href="#">Japanese ab initio SL</a>
+                                    </div>
+                                    <div class="text-ellipsis">Asama Lounge</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="period-classes with-period">
+                            <div class="class-wrapper subject-math">
+                                <div class="class-info">
+                                    <div class="period-duration">8:00 AM - 9:10 AM</div>
+                                    <div class="class-name">
+                                        <a href="#">Mathematics: Analysis SL</a>
+                                    </div>
+                                    <div class="text-ellipsis">KAC 1</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="period-classes with-period">
+                            <div class="class-wrapper subject-japanese">
+                                <div class="class-info">
+                                    <div class="period-duration">8:00 AM - 9:10 AM</div>
+                                    <div class="class-name">
+                                        <a href="#">Japanese ab initio SL</a>
+                                    </div>
+                                    <div class="text-ellipsis">KAC 2</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="period-classes with-period">
+                            <div class="class-wrapper subject-japanese">
+                                <div class="class-info">
+                                    <div class="period-duration">8:00 AM - 9:10 AM</div>
+                                    <div class="class-name">
+                                        <a href="#">Japanese ab initio SL</a>
+                                    </div>
+                                    <div class="text-ellipsis">KAC 3</div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td class="period-classes with-period">
+                            <div class="class-wrapper subject-tok">
+                                <div class="class-info">
+                                    <div class="period-duration">9:15 AM - 10:25 AM</div>
+                                    <div class="class-name">
+                                        <a href="#">Theory of Knowledge</a>
+                                    </div>
+                                    <div class="text-ellipsis">TAC 1</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="period-classes with-period">
+                            <div class="class-wrapper subject-math">
+                                <div class="class-info">
+                                    <div class="period-duration">9:15 AM - 10:25 AM</div>
+                                    <div class="class-name">
+                                        <a href="#">Mathematics: Analysis SL</a>
+                                    </div>
+                                    <div class="text-ellipsis">KAC 1</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="period-classes with-period">
+                            <div class="class-wrapper subject-physics">
+                                <div class="class-info">
+                                    <div class="period-duration">9:15 AM - 10:25 AM</div>
+                                    <div class="class-name">
+                                        <a href="#">Physics HL</a>
+                                    </div>
+                                    <div class="text-ellipsis">Physics Lab</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="period-classes with-period">
+                            <div class="class-wrapper subject-environmental">
+                                <div class="class-info">
+                                    <div class="period-duration">9:15 AM - 10:25 AM</div>
+                                    <div class="class-name">
+                                        <a href="#">Environmental Systems</a>
+                                    </div>
+                                    <div class="text-ellipsis">Asama 22</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="period-classes with-period">
+                            <div class="class-wrapper subject-physics">
+                                <div class="class-info">
+                                    <div class="period-duration">9:15 AM - 10:25 AM</div>
+                                    <div class="class-name">
+                                        <a href="#">Physics HL</a>
+                                    </div>
+                                    <div class="text-ellipsis">Physics Lab</div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td class="period-classes">
+                            <div class="break-period">Morning Break</div>
+                        </td>
+                        <td class="period-classes">
+                            <div class="break-period">Morning Break</div>
+                        </td>
+                        <td class="period-classes">
+                            <div class="break-period">Morning Break</div>
+                        </td>
+                        <td class="period-classes">
+                            <div class="break-period">Morning Break</div>
+                        </td>
+                        <td class="period-classes">
+                            <div class="break-period">Morning Break</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td class="period-classes with-period">
+                            <div class="class-wrapper subject-environmental">
+                                <div class="class-info">
+                                    <div class="period-duration">10:50 AM - 12:00 PM</div>
+                                    <div class="class-name">
+                                        <a href="#">Environmental Systems</a>
+                                    </div>
+                                    <div class="text-ellipsis">Asama 22</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="period-classes with-period">
+                            <div class="class-wrapper subject-physics">
+                                <div class="class-info">
+                                    <div class="period-duration">10:50 AM - 12:00 PM</div>
+                                    <div class="class-name">
+                                        <a href="#">Physics HL</a>
+                                    </div>
+                                    <div class="text-ellipsis">Physics Lab</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="period-classes with-period">
+                            <div class="class-wrapper subject-environmental">
+                                <div class="class-info">
+                                    <div class="period-duration">10:50 AM - 12:00 PM</div>
+                                    <div class="class-name">
+                                        <a href="#">Environmental Systems</a>
+                                    </div>
+                                    <div class="text-ellipsis">Bio Lab</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="period-classes with-period">
+                            <div class="class-wrapper subject-pe">
+                                <div class="class-info">
+                                    <div class="period-duration">10:50 AM - 12:00 PM</div>
+                                    <div class="class-name">
+                                        <a href="#">Physical Education</a>
+                                    </div>
+                                    <div class="text-ellipsis">Gym</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="period-classes with-period">
+                            <div class="class-wrapper subject-physics">
+                                <div class="class-info">
+                                    <div class="period-duration">10:50 AM - 12:00 PM</div>
+                                    <div class="class-name">
+                                        <a href="#">Physics HL</a>
+                                    </div>
+                                    <div class="text-ellipsis">Physics Lab</div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td class="period-classes with-period">
+                            <div class="class-wrapper subject-english">
+                                <div class="class-info">
+                                    <div class="period-duration">1:00 PM - 2:10 PM</div>
+                                    <div class="class-name">
+                                        <a href="#">English A Language & Literature SL</a>
+                                    </div>
+                                    <div class="text-ellipsis">Asama 25</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="period-classes with-period">
+                            <div class="class-wrapper subject-math">
+                                <div class="class-info">
+                                    <div class="period-duration">1:00 PM - 2:10 PM</div>
+                                    <div class="class-name">
+                                        <a href="#">Mathematics: Analysis SL</a>
+                                    </div>
+                                    <div class="text-ellipsis">KAC 1</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="period-classes with-period">
+                            <div class="class-wrapper subject-cs">
+                                <div class="class-info">
+                                    <div class="period-duration">1:00 PM - 2:10 PM</div>
+                                    <div class="class-name">
+                                        <a href="#">Computer Science HL</a>
+                                    </div>
+                                    <div class="text-ellipsis">Maker Space</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="period-classes with-period">
+                            <div class="class-wrapper subject-environmental">
+                                <div class="class-info">
+                                    <div class="period-duration">1:00 PM - 2:10 PM</div>
+                                    <div class="class-name">
+                                        <a href="#">Environmental Systems</a>
+                                    </div>
+                                    <div class="text-ellipsis">Asama 22</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="period-classes with-period">
+                            <div class="class-wrapper subject-pe">
+                                <div class="class-info">
+                                    <div class="period-duration">1:00 PM - 2:10 PM</div>
+                                    <div class="class-name">
+                                        <a href="#">Physical Education</a>
+                                    </div>
+                                    <div class="text-ellipsis">Gym</div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td class="period-classes">
+                            <div class="break-period">Lunch Break</div>
+                        </td>
+                        <td class="period-classes">
+                            <div class="break-period">Lunch Break</div>
+                        </td>
+                        <td class="period-classes">
+                            <div class="break-period">Lunch Break</div>
+                        </td>
+                        <td class="period-classes">
+                            <div class="break-period">Lunch Break</div>
+                        </td>
+                        <td class="period-classes">
+                            <div class="break-period">Lunch Break</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>7</td>
+                        <td class="period-classes with-period">
+                            <div class="class-wrapper subject-english">
+                                <div class="class-info">
+                                    <div class="period-duration">2:35 PM - 3:45 PM</div>
+                                    <div class="class-name">
+                                        <a href="#">English A Language & Literature SL</a>
+                                    </div>
+                                    <div class="text-ellipsis">KAC 4</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="period-classes with-period">
+                            <div class="class-wrapper subject-cs">
+                                <div class="class-info">
+                                    <div class="period-duration">2:35 PM - 3:45 PM</div>
+                                    <div class="class-name">
+                                        <a href="#">Computer Science HL</a>
+                                    </div>
+                                    <div class="text-ellipsis">Maker Space</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="period-classes with-period">
+                            <div class="class-wrapper subject-cs">
+                                <div class="class-info">
+                                    <div class="period-duration">2:35 PM - 3:45 PM</div>
+                                    <div class="class-name">
+                                        <a href="#">Computer Science HL</a>
+                                    </div>
+                                    <div class="text-ellipsis">Maker Space</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="period-classes with-period">
+                            <div class="class-wrapper subject-tok">
+                                <div class="class-info">
+                                    <div class="period-duration">2:35 PM - 3:45 PM</div>
+                                    <div class="class-name">
+                                        <a href="#">Theory of Knowledge</a>
+                                    </div>
+                                    <div class="text-ellipsis">TAC 2</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="period-classes with-period">
+                            <div class="class-wrapper subject-english">
+                                <div class="class-info">
+                                    <div class="period-duration">2:35 PM - 3:45 PM</div>
+                                    <div class="class-name">
+                                        <a href="#">English A Language & Literature SL</a>
+                                    </div>
+                                    <div class="text-ellipsis">KAC 4</div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="legend">
+            <h4>Legend</h4>
+            <div class="legend-items">
+                <div class="legend-item">
+                    <div class="legend-color subject-japanese"></div>
+                    <span>Japanese - 4</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color subject-math"></div>
+                    <span>Mathematics - 4</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color subject-physics"></div>
+                    <span>Physics - 4</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color subject-environmental"></div>
+                    <span>Environmental Systems - 4</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color subject-english"></div>
+                    <span>English - 3</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color subject-cs"></div>
+                    <span>Computer Science - 3</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color subject-tok"></div>
+                    <span>Theory of Knowledge - 2</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color subject-pe"></div>
+                    <span>Physical Education - 2</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
